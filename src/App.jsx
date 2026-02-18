@@ -375,7 +375,7 @@ function MainGuide({ darkMode, setDarkMode }) {
       })).filter(s => s.items.length > 0)
     : data.sections.filter(s => s.id === active);
     
-  const repoUrl = "https://github.com/YOUR-USERNAME/claude-code-guide";
+  const repoUrl = "https://github.com/mamarexa/claude-code-guide";
   
   return (
     <div style={{
