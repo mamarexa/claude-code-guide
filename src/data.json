@@ -1,0 +1,113 @@
+{
+  "sections": [
+    {
+      "id": "getting-started",
+      "icon": "◎",
+      "label": "Getting Started",
+      "color": "#e87c4e",
+      "items": [
+        {
+          "title": "Install Claude Code",
+          "type": "code",
+          "mac": "npm install -g @anthropic-ai/claude-code",
+          "win": "npm install -g @anthropic-ai/claude-code",
+          "note": "Requires Node.js 18+. Works on macOS, Linux, and Windows (WSL)."
+        },
+        {
+          "title": "Launch interactive REPL",
+          "type": "code",
+          "mac": "claude",
+          "win": "claude",
+          "note": "Opens the interactive session in your terminal."
+        },
+        {
+          "title": "Check version",
+          "type": "code",
+          "mac": "claude --version",
+          "win": "claude --version",
+          "note": "Ensure you're on the latest version."
+        }
+      ]
+    },
+    {
+      "id": "keyboard-shortcuts",
+      "icon": "⌨",
+      "label": "Keyboard Shortcuts",
+      "color": "#d97548",
+      "items": [
+        {
+          "title": "Stop Claude (stay in session)",
+          "type": "shortcut",
+          "mac": "Escape",
+          "win": "Escape",
+          "note": "Pauses Claude mid-response without closing the session. Never use Ctrl+C for this."
+        },
+        {
+          "title": "Hard exit the REPL",
+          "type": "shortcut",
+          "mac": "Ctrl+C twice · or · Ctrl+D",
+          "win": "Ctrl+C twice · or · Ctrl+D",
+          "note": "Both fully exit Claude Code. Use Escape to just stop Claude."
+        },
+        {
+          "title": "Cycle permission modes",
+          "type": "shortcut",
+          "mac": "Shift+Tab",
+          "win": "Shift+Tab",
+          "note": "Normal → Auto-accept (⏵⏵) → Plan Mode (⏸). Mode shown bottom-right."
+        }
+      ]
+    },
+    {
+      "id": "slash-commands",
+      "icon": "/",
+      "label": "Slash Commands",
+      "color": "#f59c76",
+      "items": [
+        {
+          "title": "/clear",
+          "type": "command",
+          "mac": "/clear",
+          "win": "/clear",
+          "note": "Clear conversation history. Use this between every task."
+        },
+        {
+          "title": "/init",
+          "type": "command",
+          "mac": "/init",
+          "win": "/init",
+          "note": "Generates CLAUDE.md by analyzing your codebase. Run this first in every new project."
+        },
+        {
+          "title": "/model",
+          "type": "command",
+          "mac": "/model sonnet\n/model haiku\n/model opus",
+          "win": "/model sonnet\n/model haiku\n/model opus",
+          "note": "Switch models mid-session. Sonnet for most tasks, Haiku for speed, Opus for hard problems."
+        }
+      ]
+    },
+    {
+      "id": "best-practices",
+      "icon": "★",
+      "label": "Best Practices",
+      "color": "#c45f33",
+      "items": [
+        {
+          "title": "Escape stops, Ctrl+C exits",
+          "type": "tip",
+          "mac": "Escape → stops Claude\nCtrl+C → exits session",
+          "win": "Escape → stops Claude\nCtrl+C → exits session",
+          "note": "Most common gotcha for new users. Memorize this."
+        },
+        {
+          "title": "Explore → Plan → Code → Commit",
+          "type": "tip",
+          "mac": "1. Explore the codebase\n2. Create a plan, ask me to confirm\n3. Implement it\n4. Review diff → commit",
+          "win": "Same workflow",
+          "note": "The #1 pattern from Anthropic's internal teams. Never skip the planning step."
+        }
+      ]
+    }
+  ]
+}

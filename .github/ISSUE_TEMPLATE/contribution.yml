@@ -1,0 +1,91 @@
+name: 💡 Submit a Tip or Best Practice
+description: Contribute a Claude Code tip, shortcut, or best practice
+title: "[TIP] "
+labels: ["contribution", "community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for contributing! Your tip will be reviewed and added to the guide.
+  
+  - type: dropdown
+    id: section
+    attributes:
+      label: Which section does this belong to?
+      options:
+        - Getting Started
+        - Keyboard Shortcuts
+        - Slash Commands
+        - CLI Flags
+        - Context Management
+        - Prompt Engineering
+        - CLAUDE.md Mastery
+        - Best Practices
+        - Parallel Workflows
+        - Custom Commands
+        - Hooks & Automation
+        - MCP Integration
+        - Models
+        - CI / Automation
+        - New Section (specify in notes)
+    validations:
+      required: true
+  
+  - type: input
+    id: title
+    attributes:
+      label: Tip Title
+      placeholder: "e.g., Use Escape to stop, not Ctrl+C"
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - code
+        - shortcut
+        - command
+        - tip
+        - model
+    validations:
+      required: true
+  
+  - type: textarea
+    id: mac
+    attributes:
+      label: Command/Shortcut (macOS)
+      placeholder: |
+        claude --flag value
+        or
+        Cmd+K
+      render: shell
+    validations:
+      required: true
+  
+  - type: textarea
+    id: windows
+    attributes:
+      label: Command/Shortcut (Windows/Linux)
+      placeholder: |
+        claude --flag value
+        or
+        Ctrl+K
+      render: shell
+    validations:
+      required: true
+  
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: "Explain what this does, when to use it, and any gotchas or tips."
+    validations:
+      required: true
+  
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context (optional)
+      placeholder: "Links to docs, related tips, or examples"

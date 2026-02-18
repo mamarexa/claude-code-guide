@@ -1,0 +1,46 @@
+name: 💬 Send Feedback
+description: Report issues, suggest improvements, or ask questions
+title: "[FEEDBACK] "
+labels: ["feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We'd love to hear from you! Use this form for bugs, suggestions, or questions.
+  
+  - type: dropdown
+    id: type
+    attributes:
+      label: Feedback Type
+      options:
+        - Bug Report
+        - Feature Request
+        - Content Error/Correction
+        - UI/UX Suggestion
+        - Question
+        - Other
+    validations:
+      required: true
+  
+  - type: textarea
+    id: description
+    attributes:
+      label: Details
+      placeholder: "Describe your feedback in detail..."
+    validations:
+      required: true
+  
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce (for bugs)
+      placeholder: |
+        1. Go to...
+        2. Click on...
+        3. See error...
+  
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      placeholder: "Screenshots, links, or any other relevant information"
