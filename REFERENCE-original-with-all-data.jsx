@@ -1,0 +1,1378 @@
+import { useState } from "react";
+
+// ─── PALETTE ────────────────────────────────────────────────────
+const C = {
+  // Backgrounds — true white + icy gray layers
+  bg:              "#f7f8f9",
+  headerBg:        "#ffffff",
+  headerBorder:    "#e2e6ea",
+  sidebarActive:   "#edf5f0",
+  cardBg:          "#ffffff",
+  cardBorder:      "#e4e8ec",
+  cardActiveBg:    "#edf5f0",
+  cardActiveBorder:"#7fb89a",
+  codeBg:          "#f4f6f8",
+  codeBorder:      "#dde2e7",
+  codeText:        "#1a2e1e",
+  textPrimary:     "#141f1a",
+  textSecondary:   "#4a5e52",
+  textMuted:       "#8a9e92",
+  noteText:        "#4a6855",
+  labelA:          "#2d6a4f",
+  labelB:          "#40916c",
+  labelC:          "#52b788",
+  labelD:          "#74c69d",
+  labelE:          "#1b4332",
+  badgeBg:         "#edf5f0",
+  accent:          "#2d6a4f",
+  accentLight:     "#edf5f0",
+  inlineCode:      "#eef2ee",
+};
+
+// ─── DATA ────────────────────────────────────────────────────────
+const data = {
+  sections: [
+    {
+      id: "getting-started",
+      icon: "◎",
+      label: "Getting Started",
+      color: C.labelC,
+      items: [
+        {
+          title: "Install Claude Code",
+          type: "code",
+          mac: "npm install -g @anthropic-ai/claude-code",
+          win: "npm install -g @anthropic-ai/claude-code",
+          note: "Requires Node.js 18+. Works on macOS, Linux, and Windows (WSL). One command to install globally.",
+        },
+        {
+          title: "Launch interactive REPL",
+          type: "code",
+          mac: "claude",
+          win: "claude",
+          note: "Opens the interactive session in your terminal. This is your primary interface.",
+        },
+        {
+          title: "Start with a prompt",
+          type: "code",
+          mac: 'claude "summarize this project"',
+          win: 'claude "summarize this project"',
+          note: "Pass a prompt directly to skip the REPL and get an immediate result.",
+        },
+        {
+          title: "Check version",
+          type: "code",
+          mac: "claude --version",
+          win: "claude --version",
+          note: "Always ensure you're on the latest version before a big session.",
+        },
+        {
+          title: "Update Claude Code",
+          type: "code",
+          mac: "claude update\n# or reinstall:\nnpm install -g @anthropic-ai/claude-code",
+          win: "claude update\n# or reinstall:\nnpm install -g @anthropic-ai/claude-code",
+          note: "Run regularly — new features and bugfixes ship frequently.",
+        },
+        {
+          title: "Check health",
+          type: "code",
+          mac: "claude doctor",
+          win: "claude doctor",
+          note: "Diagnoses installation, auth, and environment issues automatically.",
+        },
+        {
+          title: "Authenticate",
+          type: "code",
+          mac: "claude auth login",
+          win: "claude auth login",
+          note: "Opens browser for OAuth. Required on first run or after token expiry.",
+        },
+        {
+          title: "Check auth status",
+          type: "code",
+          mac: "claude auth status",
+          win: "claude auth status",
+          note: "Verify which account and plan you are authenticated with.",
+        },
+      ],
+    },
+    {
+      id: "keyboard-shortcuts",
+      icon: "⌨",
+      label: "Keyboard Shortcuts",
+      color: C.labelB,
+      items: [
+        {
+          title: "Stop Claude (stay in session)",
+          type: "shortcut",
+          mac: "Escape",
+          win: "Escape",
+          note: "Pauses Claude mid-response without closing the session. Never use Ctrl+C for this — that exits everything.",
+        },
+        {
+          title: "Hard exit the REPL",
+          type: "shortcut",
+          mac: "Ctrl+C  twice  ·  or  Ctrl+D",
+          win: "Ctrl+C  twice  ·  or  Ctrl+D",
+          note: "Both fully exit Claude Code. Use Escape to just stop Claude without losing the session.",
+        },
+        {
+          title: "Rewind conversation",
+          type: "shortcut",
+          mac: "Esc  Esc  (on empty input)",
+          win: "Esc  Esc  (on empty input)",
+          note: "Double-tap Escape on blank input to browse and restore an earlier checkpoint. Resets chat context — files on disk are unaffected.",
+        },
+        {
+          title: "Cycle permission modes",
+          type: "shortcut",
+          mac: "Shift+Tab",
+          win: "Shift+Tab",
+          note: "Normal → Auto-accept edits (⏵⏵) → Plan Mode (⏸). Mode shown bottom-right. With agent teams active, also cycles Delegate Mode.",
+        },
+        {
+          title: "New line (multi-line input)",
+          type: "shortcut",
+          mac: "Shift+Return  (after /terminal-setup)",
+          win: "Shift+Enter  (after /terminal-setup)",
+          note: "Run /terminal-setup first to configure this binding in iTerm2, VS Code, or WezTerm. Default Enter submits the prompt.",
+        },
+        {
+          title: "Paste image from clipboard",
+          type: "shortcut",
+          mac: "Ctrl+V  (not ⌘+V)",
+          win: "Ctrl+V",
+          note: "Use Ctrl+V, not Cmd+V on Mac. Known quirk — Cmd+V pastes text only. Ctrl+V pastes images from clipboard.",
+        },
+        {
+          title: "Open plan in editor",
+          type: "shortcut",
+          mac: "Ctrl+G",
+          win: "Ctrl+G",
+          note: "While in Plan Mode, opens the generated plan in your default text editor so you can edit before Claude proceeds.",
+        },
+        {
+          title: "Tab autocomplete",
+          type: "shortcut",
+          mac: "Tab",
+          win: "Tab",
+          note: "Autocomplete slash commands, file paths, and session names.",
+        },
+        {
+          title: "Navigate prompt history",
+          type: "shortcut",
+          mac: "↑  /  ↓  arrows",
+          win: "↑  /  ↓  arrows",
+          note: "Browse past prompts in the current session.",
+        },
+        {
+          title: "Jump to start / end of line",
+          type: "shortcut",
+          mac: "Ctrl+A  /  Ctrl+E",
+          win: "Ctrl+A  /  Ctrl+E",
+          note: "Bash-style readline navigation inside the Claude Code input field.",
+        },
+        {
+          title: "Move word forward / back",
+          type: "shortcut",
+          mac: "Option+F  /  Option+B",
+          win: "Alt+F  /  Alt+B",
+          note: "Mac: in iTerm2 go to Profiles → Keys → Left Option Key → set to Esc+. Then Option+F/B jumps by word.",
+        },
+        {
+          title: "Delete previous word",
+          type: "shortcut",
+          mac: "Ctrl+W",
+          win: "Ctrl+W",
+          note: "Removes the word immediately before the cursor.",
+        },
+        {
+          title: "Clear input line",
+          type: "shortcut",
+          mac: "Ctrl+U",
+          win: "Ctrl+U",
+          note: "Clears the entire current input line without submitting.",
+        },
+        {
+          title: "Open PR in browser",
+          type: "shortcut",
+          mac: "⌘+Click  on PR link",
+          win: "Ctrl+Click  on PR link",
+          note: "After /install-github-app, PR links appear in the footer. Cmd-click (Mac) or Ctrl-click opens them in the browser. Requires gh CLI.",
+        },
+        {
+          title: "Drag file into terminal",
+          type: "shortcut",
+          mac: "Shift + drag file",
+          win: "Shift + drag file",
+          note: "Hold Shift while dragging a file into the terminal to reference it in Claude. Without Shift, VS Code/Cursor open it in a new tab instead.",
+        },
+      ],
+    },
+    {
+      id: "slash-commands",
+      icon: "/",
+      label: "Slash Commands",
+      color: C.labelD,
+      items: [
+        {
+          title: "/help",
+          type: "command",
+          mac: "/help",
+          win: "/help",
+          note: "Show all available slash commands and keyboard shortcuts for your current environment.",
+        },
+        {
+          title: "/clear",
+          type: "command",
+          mac: "/clear",
+          win: "/clear",
+          note: "Clear conversation history and start fresh. Use this every time you start a new task — old context wastes tokens and confuses Claude.",
+        },
+        {
+          title: "/init",
+          type: "command",
+          mac: "/init",
+          win: "/init",
+          note: "Generates CLAUDE.md by analyzing your codebase. The single most important setup step — run it in every new project.",
+        },
+        {
+          title: "/model",
+          type: "command",
+          mac: "/model sonnet\n/model haiku\n/model opus",
+          win: "/model sonnet\n/model haiku\n/model opus",
+          note: "Switch models mid-session without restarting. Sonnet for most tasks, Haiku for speed/cost, Opus for hard problems.",
+        },
+        {
+          title: "/context",
+          type: "command",
+          mac: "/context",
+          win: "/context",
+          note: "Visualize current token usage. Monitor the context window before it gets auto-compacted.",
+        },
+        {
+          title: "/cost",
+          type: "command",
+          mac: "/cost",
+          win: "/cost",
+          note: "Show token cost for the current session. Essential for monitoring API spend.",
+        },
+        {
+          title: "/resume",
+          type: "command",
+          mac: "/resume",
+          win: "/resume",
+          note: "Opens an interactive session picker. Sessions stored per project/git repo. Press R in the picker to rename a session.",
+        },
+        {
+          title: "/memory",
+          type: "command",
+          mac: "/memory",
+          win: "/memory",
+          note: "View and manage what Claude remembers from past sessions. Promote useful learnings into CLAUDE.md permanently.",
+        },
+        {
+          title: "/permissions",
+          type: "command",
+          mac: "/permissions",
+          win: "/permissions",
+          note: "View and modify which tools Claude can use in the current session.",
+        },
+        {
+          title: "/sandbox",
+          type: "command",
+          mac: "/sandbox",
+          win: "/sandbox",
+          note: "Enable file and network isolation to reduce permission prompts safely — a safer alternative to --dangerously-skip-permissions.",
+        },
+        {
+          title: "/terminal-setup",
+          type: "command",
+          mac: "/terminal-setup",
+          win: "/terminal-setup",
+          note: "Configures Shift+Enter and other key bindings for iTerm2, VS Code, WezTerm, and Ghostty.",
+        },
+        {
+          title: "/doctor",
+          type: "command",
+          mac: "/doctor",
+          win: "/doctor",
+          note: "Check Claude Code installation health and diagnose configuration issues.",
+        },
+        {
+          title: "/config",
+          type: "command",
+          mac: "/config",
+          win: "/config",
+          note: "Open the configuration panel to adjust Claude Code settings interactively.",
+        },
+        {
+          title: "/status",
+          type: "command",
+          mac: "/status",
+          win: "/status",
+          note: "Show session info, model in use, and system status at a glance.",
+        },
+        {
+          title: "/install-github-app",
+          type: "command",
+          mac: "/install-github-app",
+          win: "/install-github-app",
+          note: "Installs the GitHub app so Claude auto-reviews your PRs. Customize the generated claude-code-review.yml to focus on bugs and security only.",
+        },
+        {
+          title: "/exit",
+          type: "command",
+          mac: "/exit",
+          win: "/exit",
+          note: "Exit the REPL cleanly.",
+        },
+      ],
+    },
+    {
+      id: "cli-flags",
+      icon: "—",
+      label: "CLI Flags",
+      color: C.labelA,
+      items: [
+        {
+          title: "Continue last session",
+          type: "code",
+          mac: "claude --continue\nclaude -c",
+          win: "claude --continue\nclaude -c",
+          note: "Picks up right where you left off — great for long refactoring or multi-step tasks across terminal restarts.",
+        },
+        {
+          title: "Resume by session ID",
+          type: "code",
+          mac: 'claude --resume abc123 "Finish the PR"',
+          win: 'claude --resume abc123 "Finish the PR"',
+          note: "Resume a specific past session by its ID. Get IDs from the /resume picker.",
+        },
+        {
+          title: "Resume from PR",
+          type: "code",
+          mac: "claude --from-pr 123",
+          win: "claude --from-pr 123",
+          note: "Resume or link a Claude Code session to a specific GitHub pull request number.",
+        },
+        {
+          title: "Print mode (non-interactive)",
+          type: "code",
+          mac: 'claude -p "explain this function"',
+          win: 'claude -p "explain this function"',
+          note: "Executes prompt and exits — perfect for scripting, CI pipelines, and piping output to other tools.",
+        },
+        {
+          title: "Pipe content into Claude",
+          type: "code",
+          mac: 'cat logs.txt | claude -p "explain these errors"\ngit diff | claude -p "write a commit message"',
+          win: 'type logs.txt | claude -p "explain these errors"',
+          note: "Claude reads stdin. Combine with grep, git diff, cat, etc. for powerful one-liners.",
+        },
+        {
+          title: "Start in Plan Mode",
+          type: "code",
+          mac: "claude --permission-mode plan",
+          win: "claude --permission-mode plan",
+          note: "Launch directly in Plan Mode — Claude explores and plans without making any file changes until you approve.",
+        },
+        {
+          title: "Select model at launch",
+          type: "code",
+          mac: "claude --model claude-sonnet-4-5-20250929\nclaude --model claude-haiku-4-5-20251001\nclaude --model claude-opus-4-20250514",
+          win: "claude --model claude-sonnet-4-5-20250929",
+          note: "Pin a specific model version string for reproducibility in scripts and CI.",
+        },
+        {
+          title: "Add working directories",
+          type: "code",
+          mac: "claude --add-dir ../apps ../shared/lib",
+          win: "claude --add-dir ..\\apps ..\\shared\\lib",
+          note: "Include extra directories in Claude's working context — essential for monorepos.",
+        },
+        {
+          title: "Output format",
+          type: "code",
+          mac: 'claude -p "query" --output-format json\nclaude -p "query" --output-format stream-json\nclaude -p "query" --output-format text',
+          win: 'claude -p "query" --output-format json',
+          note: "json and stream-json are ideal for CI pipelines that parse Claude's responses programmatically.",
+        },
+        {
+          title: "Verbose / debug output",
+          type: "code",
+          mac: 'claude --verbose\nclaude --debug "api,mcp,hooks"',
+          win: 'claude --verbose\nclaude --debug "api,mcp"',
+          note: "Verbose logs all reasoning steps. Debug accepts comma-separated subsystem names: api, mcp, tools, hooks.",
+        },
+        {
+          title: "Skip permissions (trusted envs only)",
+          type: "code",
+          mac: "claude --dangerously-skip-permissions",
+          win: "claude --dangerously-skip-permissions",
+          note: "⚠️ Only for sandboxed / CI environments. Stops all permission prompts. Prefer /sandbox or wildcard permissions for team use.",
+        },
+        {
+          title: "Use as CI linter",
+          type: "code",
+          mac: '# In package.json scripts:\n"lint:ai": "claude -p \'Review git diff vs main. Output: file:line — issue. No other text.\'"',
+          win: 'claude -p "Review git diff for bugs" --output-format json',
+          note: "Add Claude as a lint step in your CI/CD pipeline. Use --output-format json to parse results programmatically.",
+        },
+      ],
+    },
+    {
+      id: "context-management",
+      icon: "◉",
+      label: "Context Management",
+      color: C.labelC,
+      items: [
+        {
+          title: "/clear between every task",
+          type: "tip",
+          mac: "/clear",
+          win: "/clear",
+          note: "Old conversation history eats tokens and confuses Claude on new tasks. Clear aggressively. Use ↑ arrow or /resume to revisit past sessions when needed.",
+        },
+        {
+          title: "Monitor token usage",
+          type: "tip",
+          mac: "/context\n/cost",
+          win: "/context\n/cost",
+          note: "Watch the token bar. When nearing the limit, Claude auto-compacts. You can preempt this with /clear + a brief summary to preserve quality.",
+        },
+        {
+          title: "Reference docs, don't embed them",
+          type: "tip",
+          mac: "# ✅ In CLAUDE.md:\n\"For FooBarError, see ./docs/errors.md\"\n\n# ❌ Avoid:\n@./docs/errors.md  (loads every session)",
+          win: "Same pattern",
+          note: "Referencing by path is token-efficient — Claude reads the doc on demand. @-embedding loads the full file into every conversation whether you need it or not.",
+        },
+        {
+          title: "Keep CLAUDE.md under 150 lines",
+          type: "tip",
+          mac: "wc -l .claude/CLAUDE.md",
+          win: "wc -l .claude\\CLAUDE.md",
+          note: "After ~150 lines, CLAUDE.md loses effectiveness. Use modular .claude/rules/*.md files for topic-specific instructions to keep it lean.",
+        },
+        {
+          title: "Use Skills for progressive disclosure",
+          type: "tip",
+          mac: "# Skills load on-demand (not every session):\n.claude/skills/my-skill/SKILL.md\n\n# Invoked with:\n/my-skill",
+          win: "Same",
+          note: "Skills replace @-file docs. Claude only loads skill content when invoked — massive token savings vs. bloating CLAUDE.md with rarely-needed info.",
+        },
+        {
+          title: "Audit and limit MCP servers",
+          type: "tip",
+          mac: "claude mcp list\n# Keep to 4–5 active servers max",
+          win: "claude mcp list",
+          note: "Each MCP server's tool schema loads into your context window. 20k+ tokens of MCP leaves only ~20k for actual work. More MCP servers ≠ better.",
+        },
+        {
+          title: "Rewind to restore earlier context",
+          type: "shortcut",
+          mac: "Esc  Esc  on empty input",
+          win: "Esc  Esc  on empty input",
+          note: "Choose an earlier message checkpoint. Claude resets its context to that point — files on disk are unaffected. Great for undoing a bad direction.",
+        },
+        {
+          title: "Name sessions for findability",
+          type: "tip",
+          mac: "# /resume → navigate to session → press R",
+          win: "# /resume → navigate to session → press R",
+          note: "Default session names are timestamps. Rename to 'feature/auth-refactor' so you can find them days later.",
+        },
+      ],
+    },
+    {
+      id: "prompt-engineering",
+      icon: "✎",
+      label: "Prompt Engineering",
+      color: C.labelD,
+      items: [
+        {
+          title: "Always plan before coding",
+          type: "tip",
+          mac: "\"Explore the codebase, create a detailed plan,\nthen ask me to confirm before writing any code.\"",
+          win: "Same prompt",
+          note: "The Explore → Plan → Code → Commit loop is the #1 pattern from Anthropic's own teams. Never let Claude jump straight to implementation on complex tasks.",
+        },
+        {
+          title: "Ask Claude to ask questions",
+          type: "tip",
+          mac: "\"Before planning, ask me clarifying questions\nabout the requirements. Don't start coding yet.\"",
+          win: "Same prompt",
+          note: "Forces Claude to surface hidden assumptions before building. Results in dramatically better output. A single round of questions prevents hours of rework.",
+        },
+        {
+          title: "Write plan to plan.md",
+          type: "tip",
+          mac: "\"Write your plan to plan.md first.\nUse it as a checklist as you implement.\"",
+          win: "Same prompt",
+          note: "External plan files let you edit Claude's approach before it starts, track progress, and share context with parallel agents.",
+        },
+        {
+          title: "Use 'think hard' / 'ultrathink'",
+          type: "tip",
+          mac: "\"Think hard before proposing a solution.\"\n\"Ultrathink through this architecture.\"",
+          win: "Same prompts",
+          note: "These phrases activate extended reasoning. Use sparingly — they consume more tokens but dramatically improve output on hard problems. 'Ultrathink' > 'think hard' > nothing.",
+        },
+        {
+          title: "Reference files with @",
+          type: "code",
+          mac: "@src/auth/login.py Fix the JWT expiry bug in validate_token()\n@package.json What test runner is this project using?",
+          win: "@src\\auth\\login.py Fix the JWT expiry bug",
+          note: "The @ prefix loads a specific file into context. Always reference the exact file and function — vague prompts produce vague results.",
+        },
+        {
+          title: "Paste URLs for live context",
+          type: "tip",
+          mac: "\"Read https://github.com/org/repo/issues/84\nand implement the fix described there.\"",
+          win: "Same",
+          note: "Claude fetches URLs directly. Paste GitHub issues, API docs, Stack Overflow answers, or Figma design specs right into the prompt.",
+        },
+        {
+          title: "Drag screenshots for UI context",
+          type: "tip",
+          mac: "Shift+drag screenshot/wireframe into terminal",
+          win: "Drag screenshot into terminal",
+          note: "Visual context prevents misunderstandings on UI tasks. Drag a Figma export or mockup directly into the terminal.",
+        },
+        {
+          title: "Use ! prefix for shell commands",
+          type: "code",
+          mac: "!git status\n!npm test\n!grep -rn 'TODO' src/",
+          win: "!git status\n!npm test",
+          note: "The ! prefix runs shell commands directly without a conversational turn. Faster and cheaper than asking Claude conversationally.",
+        },
+        {
+          title: "Always pair 'never' with an alternative",
+          type: "tip",
+          mac: "# ✅ Do:\n\"Never use --foo-bar; prefer --baz instead\"\n\n# ❌ Don't:\n\"Never use --foo-bar\"  (agent gets stuck)",
+          win: "Same pattern",
+          note: "Without an alternative, Claude gets stuck in loops trying to find a compliant path. Always pair a prohibition with what to do instead.",
+        },
+        {
+          title: "Use voice input for faster prompting",
+          type: "tip",
+          mac: "Use SuperWhisper, Apple Dictation,\nor Whisper → paste into Claude",
+          win: "Use Windows Speech Recognition\nor Whisper → paste into Claude",
+          note: "Speaking is faster than typing for many developers. Whisper quietly with earphones in shared offices. Voice prompts tend to be more natural and complete.",
+        },
+        {
+          title: "Copy terminal output back to Claude",
+          type: "tip",
+          mac: "⌘+A  then  ⌘+C  in terminal\n→ paste into Claude with Ctrl+V",
+          win: "Ctrl+A  then  Ctrl+C\n→ paste into Claude",
+          note: "Select all terminal output, copy, and paste back into Claude for analysis or debugging. Works for logs, build errors, test output — any CLI output.",
+        },
+      ],
+    },
+    {
+      id: "claude-md",
+      icon: "📄",
+      label: "CLAUDE.md Mastery",
+      color: C.labelB,
+      items: [
+        {
+          title: "Generate with /init",
+          type: "code",
+          mac: "cd your-project && claude\n/init",
+          win: "cd your-project && claude\n/init",
+          note: "Claude analyzes your codebase and generates a smart CLAUDE.md. Always do this first in a new project.",
+        },
+        {
+          title: "Global CLAUDE.md",
+          type: "code",
+          mac: "~/.claude/CLAUDE.md",
+          win: "%USERPROFILE%\\.claude\\CLAUDE.md",
+          note: "Your personal coding style, preferred libraries, formatting rules. Applied to every project automatically.",
+        },
+        {
+          title: "Project CLAUDE.md",
+          type: "code",
+          mac: ".claude/CLAUDE.md\n# or project root:\nCLAUDE.md",
+          win: ".claude\\CLAUDE.md\n# or project root:\nCLAUDE.md",
+          note: "Project-specific: architecture overview, tech stack, testing approach, common commands. Commit to Git for team consistency.",
+        },
+        {
+          title: "Nested CLAUDE.md per subdirectory",
+          type: "code",
+          mac: "frontend/CLAUDE.md   # React conventions\nbackend/CLAUDE.md    # API patterns\ninfra/CLAUDE.md      # Terraform rules",
+          win: "frontend\\CLAUDE.md",
+          note: "Claude loads the CLAUDE.md closest to the files it's editing. Perfect for monorepos with different tech in each folder.",
+        },
+        {
+          title: "What to include in CLAUDE.md",
+          type: "tip",
+          mac: "# ✅ Great candidates:\n- Common commands: npm test, make build\n- Code style: functional components, ES modules\n- Architecture: state in Zustand, see src/stores\n- Testing: RTL required for all components\n- What Claude repeatedly gets wrong (anti-patterns)",
+          win: "Same",
+          note: "Document what Claude consistently gets wrong IN YOUR CODEBASE, not general best practices. That's where the real compounding value is.",
+        },
+        {
+          title: "Use Rules for modular instructions",
+          type: "code",
+          mac: ".claude/rules/testing.md\n.claude/rules/security.md\n.claude/rules/api-design.md",
+          win: ".claude\\rules\\testing.md",
+          note: "Rules files let you scope instructions to specific file paths using frontmatter. Keeps CLAUDE.md lean while adding depth where needed.",
+        },
+        {
+          title: "Commit .claude/ directory to Git",
+          type: "code",
+          mac: "git add .claude/ CLAUDE.md\ngit commit -m 'chore: add Claude Code config'",
+          win: "git add .claude\\ CLAUDE.md",
+          note: "Share team settings, hooks, custom commands, and rules with your entire team. This is how you scale Claude Code across engineering.",
+        },
+        {
+          title: "Improve with /memory",
+          type: "code",
+          mac: "/memory",
+          win: "/memory",
+          note: "Claude tracks learnings from sessions. Review with /memory and promote useful patterns into CLAUDE.md for permanent retention.",
+        },
+      ],
+    },
+    {
+      id: "best-practices",
+      icon: "★",
+      label: "Best Practices",
+      color: C.labelC,
+      items: [
+        {
+          title: "Escape stops, Ctrl+C exits",
+          type: "tip",
+          mac: "Escape  →  stops Claude\n⌘+C or Ctrl+C  →  exits session",
+          win: "Escape  →  stops Claude\nCtrl+C  →  exits session",
+          note: "This is the most common gotcha for new users. Memorize it: Escape to pause, Ctrl+C to quit.",
+        },
+        {
+          title: "Explore → Plan → Code → Commit",
+          type: "tip",
+          mac: "1. \"Explore the codebase\"\n2. \"Create a plan, ask me to confirm\"\n3. (confirm plan)\n4. \"Implement it\"\n5. git diff → commit",
+          win: "Same workflow",
+          note: "This 5-step loop is the highest-ROI habit from Anthropic's internal engineering teams. Never skip the planning step on complex work.",
+        },
+        {
+          title: "Write tests, then implement",
+          type: "tip",
+          mac: "\"Write tests for X first,\nthen implement X to make them pass.\"",
+          win: "Same prompt",
+          note: "Tests are the only reliable validation mechanism for AI-generated code. AI code often works superficially but has subtle bugs — tests catch them.",
+        },
+        {
+          title: "Review every diff before committing",
+          type: "code",
+          mac: "git diff\ngit diff --staged\ngit add -p  # stage hunks interactively",
+          win: "git diff\ngit diff --staged",
+          note: "Never auto-commit AI work without reading the diff. Claude moves fast — a 60-second review catches most mistakes before they hit your repo.",
+        },
+        {
+          title: "Use small, focused commits",
+          type: "tip",
+          mac: "git commit -m 'fix: validate JWT expiry in auth.py'",
+          win: "Same",
+          note: "Ask Claude to commit after each logical unit of work. Small commits are easier to revert, review, and understand than giant AI-generated dumps.",
+        },
+        {
+          title: "Document what Claude gets wrong",
+          type: "tip",
+          mac: "# In CLAUDE.md:\n# ⚠️ Never use React.memo here — causes flicker\n# ✅ Use useMemo instead. See src/hooks/useData.ts",
+          win: "Same",
+          note: "Every time Claude makes the same mistake twice, add a corrective rule to CLAUDE.md. This is compounding value that makes Claude smarter over time in your codebase.",
+        },
+        {
+          title: "Use Plan Mode for risky changes",
+          type: "shortcut",
+          mac: "Shift+Tab  (cycle to Plan Mode)\n# or at launch:\nclaude --permission-mode plan",
+          win: "Shift+Tab\n# or:\nclaude --permission-mode plan",
+          note: "In Plan Mode (⏸), Claude can read files and plan but cannot write anything. Approve the plan before switching to execute mode.",
+        },
+        {
+          title: "Run linters/formatters via hooks",
+          type: "tip",
+          mac: "# .claude/settings.json:\n# PostToolUse hook runs black after every .py write",
+          win: "Same JSON config",
+          note: "Automate post-write cleanup so Claude's output is always formatted. Configure once in settings.json and forget about it.",
+        },
+        {
+          title: "Prefer wildcard permissions over skip",
+          type: "code",
+          mac: '# .claude/settings.json:\n{\n  "permissions": {\n    "allowedTools": [\n      "Bash(git *)",\n      "Bash(npm run *)",\n      "Edit(/src/**)",\n      "Read(**)",\n    ]\n  }\n}',
+          win: "Same JSON config",
+          note: "Wildcard permissions are surgical and auditable. --dangerously-skip-permissions gives blanket access and belongs only in isolated CI sandboxes.",
+        },
+        {
+          title: "Use monorepos for large projects",
+          type: "tip",
+          mac: "# Single repo: schema + API + frontend\n# Claude cross-references all three",
+          win: "Same",
+          note: "Monorepos are ideal for LLMs. Claude can read the schema, API definitions, and implementation in one pass — finding connections a human would miss.",
+        },
+        {
+          title: "Set notification on task completion",
+          type: "tip",
+          mac: "# iTerm2: Prefs → Profiles → Terminal\n# → Enable 'Send notification on idle'\n# → Lets you step away on long tasks",
+          win: "Use Windows notification via terminal emulator settings",
+          note: "For long-running Claude tasks, configure terminal notifications so you're alerted when Claude needs your input or finishes.",
+        },
+      ],
+    },
+    {
+      id: "parallel-workflows",
+      icon: "⫸",
+      label: "Parallel Workflows",
+      color: C.labelA,
+      items: [
+        {
+          title: "Create git worktrees for parallel agents",
+          type: "code",
+          mac: "# Each worktree = isolated directory + branch:\ngit worktree add ../project-feat-a -b feature-a\ngit worktree add ../project-feat-b -b feature-b\n\n# Open each in a separate terminal:\ncd ../project-feat-a && claude\n# (in another terminal)\ncd ../project-feat-b && claude",
+          win: "git worktree add ..\\project-feat-a -b feature-a",
+          note: "Each worktree is a separate directory with its own files, sharing the same .git history. Each Claude instance works in complete isolation — no conflicts.",
+        },
+        {
+          title: "Copy .env to each worktree",
+          type: "code",
+          mac: "cp .env ../project-feat-a/.env\ncp .env ../project-feat-b/.env",
+          win: "copy .env ..\\project-feat-a\\.env",
+          note: ".env files are gitignored and don't carry over automatically. Always copy them before starting Claude in a new worktree.",
+        },
+        {
+          title: "Install deps in each worktree",
+          type: "code",
+          mac: "cd ../project-feat-a && npm install\n# pnpm is better — symlinks shared packages:\ncd ../project-feat-a && pnpm install",
+          win: "cd ..\\project-feat-a && npm install",
+          note: "node_modules don't carry over. pnpm is strongly recommended for multi-worktree setups — it symlinks packages and avoids duplicating gigabytes of dependencies.",
+        },
+        {
+          title: "Run multiple agents in VS Code panes",
+          type: "tip",
+          mac: "# Install Claude Code VS Code extension\n# Open each worktree in its own pane/window\n# Start 'claude' in each integrated terminal",
+          win: "Same",
+          note: "The VS Code extension makes it easy to visually manage multiple parallel Claude instances. Each pane is a separate Claude session on a separate branch.",
+        },
+        {
+          title: "Spawn subagents with the Task tool",
+          type: "tip",
+          mac: "# In prompt or CLAUDE.md:\n\"Use the Task tool to spawn subagents\nfor each sub-component in parallel.\"",
+          win: "Same prompt",
+          note: "Claude Code's built-in Task tool lets a main agent orchestrate specialized subagents. Each gets its own focused context — no cross-contamination.",
+        },
+        {
+          title: "Handoff via plan.md",
+          type: "tip",
+          mac: "# In Plan Mode prompt:\n\"Gather all context and write a comprehensive\nplan.md — include everything the next agent needs.\nIt will not have any other context.\"",
+          win: "Same prompt",
+          note: "When handing off between agents or sessions, force Claude to write a complete context dump to plan.md. The next agent reads it cold and hits the ground running.",
+        },
+        {
+          title: "Run autonomous tasks in containers",
+          type: "code",
+          mac: "# --dangerously-skip-permissions is SAFE\n# inside an isolated Docker container:\ndocker run -it --rm myimage \\\n  claude --dangerously-skip-permissions -p \\\n  \"Execute PLAN.md end to end\"",
+          win: "Same docker run command",
+          note: "Long autonomous tasks (30+ min) belong in isolated containers or cloud sandboxes. Safe because the environment is fully disposable.",
+        },
+        {
+          title: "Clean up worktrees when done",
+          type: "code",
+          mac: "git worktree remove ../project-feat-a\ngit worktree list  # verify cleanup",
+          win: "git worktree remove ..\\project-feat-a",
+          note: "⚠️ Forgotten worktrees accumulate fast and consume significant disk space (GBs on large repos with build artifacts). Clean up regularly.",
+        },
+      ],
+    },
+    {
+      id: "custom-commands",
+      icon: "✦",
+      label: "Custom Commands",
+      color: C.labelD,
+      items: [
+        {
+          title: "Create project slash command",
+          type: "code",
+          mac: "mkdir -p .claude/commands\n\n# .claude/commands/review.md:\nReview the changed files for bugs, security issues,\nand performance problems. Be specific and concise.",
+          win: "mkdir .claude\\commands",
+          note: "Available to everyone in the project via /review. Commit to Git so the whole team benefits.",
+        },
+        {
+          title: "Create personal slash command",
+          type: "code",
+          mac: "mkdir -p ~/.claude/commands\n\n# ~/.claude/commands/daily.md:\nSummarize what I worked on today from git log\nand suggest tomorrow's top 3 priorities.",
+          win: "mkdir %USERPROFILE%\\.claude\\commands",
+          note: "Personal commands in ~/.claude/commands are available across ALL your projects. Great for personal workflows.",
+        },
+        {
+          title: "Command with arguments",
+          type: "code",
+          mac: "# .claude/commands/fix-issue.md:\nFix GitHub issue #$ARGUMENTS.\nRead the issue, explore affected code,\nimplement a fix, and write a test.\n\n# Usage:\n/fix-issue 84",
+          win: "Same .md format",
+          note: "$ARGUMENTS is replaced by whatever you pass after the command name. Use $1, $2, $3 for positional arguments.",
+        },
+        {
+          title: "Command with frontmatter",
+          type: "code",
+          mac: "---\ndescription: Smart git commit\nargument-hint: [optional message]\nallowed-tools: Bash(git *)\n---\nReview staged changes with git diff --staged.\nThen write a conventional commit message.\nOptional context: $ARGUMENTS",
+          win: "Same YAML format",
+          note: "Frontmatter controls metadata, Tab autocomplete hints, and pre-approved tools. The description shows in /help listings.",
+        },
+        {
+          title: "Use Skills (modern approach)",
+          type: "code",
+          mac: "# Skills replace commands with extra power:\nmkdir -p .claude/skills/deploy\n# .claude/skills/deploy/SKILL.md\n\n# Usage: /deploy",
+          win: "Same",
+          note: "Skills support additional files, invocation control, and subagent execution. .claude/commands/ still works but Skills are the recommended modern pattern.",
+        },
+        {
+          title: "Anti-pattern: too many custom commands",
+          type: "tip",
+          mac: "# Aim for < 10 project commands\n# If you have 15+, you've over-engineered it",
+          win: "Same",
+          note: "\"If you have a long list of complex custom slash commands, you've created an anti-pattern. The entire point is to type almost whatever you want and get useful results.\" — Shrivu Shankar",
+        },
+      ],
+    },
+    {
+      id: "hooks",
+      icon: "↺",
+      label: "Hooks & Automation",
+      color: C.labelB,
+      items: [
+        {
+          title: "Auto-format Python on write",
+          type: "code",
+          mac: '# .claude/settings.json:\n{\n  "hooks": {\n    "PostToolUse": [{\n      "matcher": "Write(*.py)",\n      "hooks": [{\n        "type": "command",\n        "command": "black $file && isort $file"\n      }]\n    }]\n  }\n}',
+          win: "Same JSON config",
+          note: "Runs black + isort after every Python file write. Claude's output is always formatted before it sees the diff.",
+        },
+        {
+          title: "Run tests after edits",
+          type: "code",
+          mac: '{\n  "hooks": {\n    "PostToolUse": [{\n      "matcher": "Write(src/**/*.ts)",\n      "hooks": [{\n        "type": "command",\n        "command": "npx jest --testPathPattern=$file --passWithNoTests"\n      }]\n    }]\n  }\n}',
+          win: "Same JSON config",
+          note: "Automatically runs related unit tests after each write. Claude sees test failures and self-corrects without you having to ask.",
+        },
+        {
+          title: "Restrict permissions by pattern",
+          type: "code",
+          mac: '{\n  "permissions": {\n    "allowedTools": [\n      "Read(**)",\n      "Write(/src/**)",\n      "Bash(git *)",\n      "Bash(npm run *)"\n    ],\n    "deny": [\n      "Read(./.env)",\n      "Write(./production.*)",\n      "Bash(rm -rf *)"\n    ]\n  }\n}',
+          win: "Same JSON config",
+          note: "Fine-grained allowlists + denylists with glob patterns. Deny takes precedence over allow. Put in .claude/settings.json for project-level control.",
+        },
+        {
+          title: "Enterprise: managed-settings.json",
+          type: "code",
+          mac: ".claude/managed-settings.json",
+          win: ".claude\\managed-settings.json",
+          note: "Enterprise teams: policies in managed-settings.json cannot be overridden by developers. Enforce security baselines org-wide.",
+        },
+        {
+          title: "14 hook event types available",
+          type: "tip",
+          mac: "PreToolUse · PostToolUse\nPreFileWrite · PostFileWrite\nPreBashExec · PostBashExec\n... and 8 more",
+          win: "Same events",
+          note: "Hooks fire on specific tool events. Combine with lint scripts, notification tools, logging, and test runners for powerful automation pipelines.",
+        },
+        {
+          title: "Debug hook execution",
+          type: "code",
+          mac: 'claude --debug "hooks"',
+          win: 'claude --debug "hooks"',
+          note: "Shows hook matching, command execution, output, and timing. Essential when hooks aren't firing as expected.",
+        },
+      ],
+    },
+    {
+      id: "mcp",
+      icon: "⬡",
+      label: "MCP Integration",
+      color: C.labelA,
+      items: [
+        {
+          title: "Add GitHub MCP (HTTP transport)",
+          type: "code",
+          mac: "claude mcp add --transport http github \\\n  https://mcp.github.com",
+          win: "claude mcp add --transport http github https://mcp.github.com",
+          note: "Enables Claude to search repos, read issues, create PRs, and review code from inside any Claude Code session.",
+        },
+        {
+          title: "Add GitHub MCP (npx)",
+          type: "code",
+          mac: "claude mcp add github -- \\\n  npx -y @modelcontextprotocol/server-github",
+          win: "claude mcp add github -- npx -y @modelcontextprotocol/server-github",
+          note: "Alternative installation via npx. The -- separator tells Claude to run the rest as a subprocess command.",
+        },
+        {
+          title: "Add Playwright MCP (browser automation)",
+          type: "code",
+          mac: "claude mcp add -s user playwright \\\n  npx @playwright/mcp@latest",
+          win: "claude mcp add -s user playwright npx @playwright/mcp@latest",
+          note: "Lets Claude control a real browser: take screenshots, fill forms, run end-to-end tests. Highly recommended as a daily companion.",
+        },
+        {
+          title: "List MCP servers",
+          type: "code",
+          mac: "claude mcp list",
+          win: "claude mcp list",
+          note: "Verify which MCP servers are configured and active. Audit regularly — each server consumes tokens from your context window.",
+        },
+        {
+          title: "Debug MCP connections",
+          type: "code",
+          mac: "claude --mcp-debug",
+          win: "claude --mcp-debug",
+          note: "Shows connection status, available tools, and error details for all configured MCP servers.",
+        },
+        {
+          title: "Keep MCP footprint minimal",
+          type: "tip",
+          mac: "# Rule of thumb: 4–5 servers max\n# Each server schema = tokens consumed",
+          win: "Same",
+          note: "\"If you're using 20k+ tokens of MCPs, you're crippling Claude. That leaves only ~20k tokens for actual work.\" More MCP servers is not better.",
+        },
+        {
+          title: "Use Gemini CLI as web fallback",
+          type: "tip",
+          mac: "# Create a skill routing blocked URLs\n# to Gemini CLI (broader web access)\n# ~/.claude/skills/web-fallback/SKILL.md",
+          win: "Same concept",
+          note: "Claude's WebFetch can't access some sites (Reddit, etc.). A custom skill can invoke Gemini CLI as a fallback for content Claude can't fetch directly.",
+        },
+      ],
+    },
+    {
+      id: "models",
+      icon: "◈",
+      label: "Models",
+      color: C.labelC,
+      items: [
+        {
+          title: "Sonnet 4.5 — Best default",
+          type: "model",
+          mac: "claude-sonnet-4-5-20250929",
+          win: "claude-sonnet-4-5-20250929",
+          note: "Best default for most coding tasks. Strong reasoning, efficient token use. Recommended for Pro and Max plans. Use for 80%+ of work.",
+        },
+        {
+          title: "Haiku 4.5 — Fast & cheap",
+          type: "model",
+          mac: "claude-haiku-4-5-20251001",
+          win: "claude-haiku-4-5-20251001",
+          note: "Fastest and most affordable. Use for simple, repetitive tasks: renaming, formatting, boilerplate. Ideal for CI pipelines.",
+        },
+        {
+          title: "Opus 4.5 — Most capable",
+          type: "model",
+          mac: "claude-opus-4-20250514",
+          win: "claude-opus-4-20250514",
+          note: "Maximum capability. Reserve for complex architecture, hard debugging, and multi-step reasoning. Costs more — use intentionally.",
+        },
+        {
+          title: "Switch model mid-session",
+          type: "code",
+          mac: "/model sonnet\n/model haiku\n/model opus",
+          win: "/model sonnet",
+          note: "No restart needed. Switch to a cheaper model for easy follow-up tasks after a hard planning phase.",
+        },
+        {
+          title: "Launch with pinned model version",
+          type: "code",
+          mac: "claude --model claude-sonnet-4-5-20250929",
+          win: "claude --model claude-sonnet-4-5-20250929",
+          note: "Pin exact version strings in CI scripts for reproducibility.",
+        },
+        {
+          title: "Set effort level for hard tasks",
+          type: "code",
+          mac: "CLAUDE_CODE_EFFORT_LEVEL=high claude",
+          win: "set CLAUDE_CODE_EFFORT_LEVEL=high && claude",
+          note: "Activates extended thinking. Use for architecture reviews, security audits, and complex debugging sessions.",
+        },
+      ],
+    },
+    {
+      id: "ci-automation",
+      icon: "⚙",
+      label: "CI / Automation",
+      color: C.labelA,
+      items: [
+        {
+          title: "Headless mode in scripts",
+          type: "code",
+          mac: 'claude -p "Review this diff for security issues" < diff.txt\ngit diff | claude -p "write a commit message"',
+          win: "Same",
+          note: "The -p flag makes Claude non-interactive — perfect for cron jobs, build scripts, and automated pipelines.",
+        },
+        {
+          title: "JSON output for parsing",
+          type: "code",
+          mac: 'claude -p "query" --output-format json | jq \'.content[0].text\'',
+          win: 'claude -p "query" --output-format json',
+          note: "Use json or stream-json output format to parse Claude's responses programmatically in CI systems.",
+        },
+        {
+          title: "GitHub Actions integration",
+          type: "code",
+          mac: "# .github/workflows/claude-review.yml:\njobs:\n  review:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - run: npm install -g @anthropic-ai/claude-code\n      - run: |\n          git diff HEAD~1 | \\\n          claude -p 'Review for bugs and security' \\\n          --output-format json > review.json\n        env:\n          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}",
+          win: "Same YAML",
+          note: "Add ANTHROPIC_API_KEY as an encrypted GitHub Actions secret. Never hardcode API keys.",
+        },
+        {
+          title: "Set API key as environment variable",
+          type: "code",
+          mac: "export ANTHROPIC_API_KEY=sk-ant-...\n# Add to ~/.zshrc or ~/.bashrc to persist",
+          win: "setx ANTHROPIC_API_KEY sk-ant-...",
+          note: "Claude Code reads ANTHROPIC_API_KEY automatically. In CI, add it as an encrypted secret.",
+        },
+        {
+          title: "Auto-review PRs on push",
+          type: "code",
+          mac: "# 1. Run: /install-github-app\n# 2. Customize the generated file:\n# .github/claude-code-review.yml\ndirect_prompt: |\n  Review for bugs and security issues only.\n  Be concise. Skip style and nitpicks.",
+          win: "Same",
+          note: "After setup, Claude reviews every PR automatically. Edit the yml — default reviews are too verbose and nitpick style issues.",
+        },
+        {
+          title: "Customize terminal status line",
+          type: "tip",
+          mac: "# Add to ~/.claude/CLAUDE.md or settings:\n# Shows: model | git branch\n# | uncommitted files | token % used\n# Opus 4.5 | 🔀feat/auth (3 files) | ██░ 22%",
+          win: "Same via CLAUDE.md",
+          note: "The status bar at the bottom of Claude Code is fully customizable. Power users show model, git branch, uncommitted file count, and a token usage progress bar.",
+        },
+      ],
+    },
+  ],
+};
+
+// ─── TYPE CONFIG ─────────────────────────────────────────────────
+const typeConfig = {
+  code:     { label: "CMD",   bg: C.labelA },
+  shortcut: { label: "KEY",   bg: C.labelB },
+  command:  { label: "/",     bg: C.labelC },
+  tip:      { label: "TIP",   bg: C.labelD },
+  model:    { label: "AI",    bg: C.labelE },
+};
+
+// ─── COPY BUTTON ─────────────────────────────────────────────────
+function CopyBtn({ text }) {
+  const [ok, setOk] = useState(false);
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(text);
+        setOk(true);
+        setTimeout(() => setOk(false), 1400);
+      }}
+      title="Copy to clipboard"
+      style={{
+        position: "absolute", top: 8, right: 8,
+        background: ok ? C.labelB : "transparent",
+        border: `1px solid ${ok ? C.labelB : C.codeBorder}`,
+        borderRadius: 4, padding: "2px 8px",
+        fontSize: 10, color: ok ? "#fff" : C.textMuted,
+        cursor: "pointer", transition: "all 0.18s",
+        fontFamily: "inherit", letterSpacing: "0.05em",
+        whiteSpace: "nowrap",
+      }}
+    >{ok ? "✓ copied" : "copy"}</button>
+  );
+}
+
+// ─── PLATFORM BLOCK ──────────────────────────────────────────────
+function PlatformBlock({ mac, win }) {
+  const [tab, setTab] = useState("mac");
+  const same = mac === win;
+  const content = tab === "mac" ? mac : win;
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      {!same && (
+        <div style={{ display: "flex", gap: 4, marginBottom: 7 }}>
+          {[["mac", "⌘ macOS"], ["win", "⊞ Win / Linux"]].map(([p, label]) => (
+            <button key={p} onClick={e => { e.stopPropagation(); setTab(p); }}
+              style={{
+                padding: "3px 12px", borderRadius: 5, border: "none",
+                background: tab === p ? C.labelB : "#f0f0f0",
+                color: tab === p ? "#fff" : C.textMuted,
+                fontSize: 11, fontWeight: tab === p ? 600 : 400,
+                cursor: "pointer", transition: "all 0.15s",
+                fontFamily: "inherit", letterSpacing: "0.03em",
+              }}
+            >{label}</button>
+          ))}
+        </div>
+      )}
+      {same && (
+        <div style={{ marginBottom: 5, fontSize: 10, color: C.textMuted, letterSpacing: "0.05em" }}>
+          ⌘ macOS  ·  ⊞ Windows / Linux
+        </div>
+      )}
+      <div style={{
+        position: "relative", background: C.codeBg,
+        border: `1px solid ${C.codeBorder}`, borderRadius: 7,
+        padding: "10px 48px 10px 14px",
+      }}>
+        <pre style={{
+          margin: 0,
+          fontFamily: "'SF Mono','Fira Code','Cascadia Code',Menlo,monospace",
+          fontSize: 12.5, color: C.codeText,
+          whiteSpace: "pre-wrap", wordBreak: "break-all", lineHeight: 1.65,
+        }}>{content}</pre>
+        <CopyBtn text={content} />
+      </div>
+    </div>
+  );
+}
+
+// ─── CARD ─────────────────────────────────────────────────────────
+function Card({ item }) {
+  const [open, setOpen] = useState(false);
+  const tc = typeConfig[item.type] || typeConfig.tip;
+
+  return (
+    <div
+      onClick={() => setOpen(o => !o)}
+      style={{
+        background: open ? C.cardActiveBg : C.cardBg,
+        border: `1px solid ${open ? C.cardActiveBorder : C.cardBorder}`,
+        borderRadius: 10, padding: "13px 14px", cursor: "pointer",
+        transition: "all 0.2s ease",
+        boxShadow: open ? "0 2px 16px rgba(45,106,79,0.12)" : "none",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 9 }}>
+        <span style={{
+          fontSize: 9, fontWeight: 700, background: tc.bg, color: "#fff",
+          padding: "2px 7px", borderRadius: 3, letterSpacing: "0.08em",
+          flexShrink: 0, fontFamily: "monospace", marginTop: 2,
+        }}>{tc.label}</span>
+        <span style={{
+          fontSize: 13, color: C.textPrimary, fontWeight: 500,
+          letterSpacing: "-0.01em", lineHeight: 1.35, flex: 1,
+        }}>{item.title}</span>
+        <span style={{
+          color: C.textMuted, fontSize: 12, flexShrink: 0,
+          transition: "transform 0.2s",
+          transform: open ? "rotate(180deg)" : "none",
+        }}>▾</span>
+      </div>
+
+      {open && (
+        <div onClick={e => e.stopPropagation()}>
+          <PlatformBlock mac={item.mac} win={item.win} />
+          {item.note && (
+            <p style={{
+              margin: "9px 0 0", fontSize: 12.5, color: C.noteText,
+              lineHeight: 1.6, fontStyle: "italic",
+            }}>{item.note}</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── SEARCH BAR ──────────────────────────────────────────────────
+function SearchBar({ value, onChange }) {
+  return (
+    <div style={{ position: "relative", marginBottom: 24 }}>
+      <span style={{
+        position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)",
+        color: C.textMuted, fontSize: 15, pointerEvents: "none",
+      }}>⌕</span>
+      <input
+        type="text" value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder="Search commands, shortcuts, tips, best practices…"
+        style={{
+          width: "100%", boxSizing: "border-box",
+          padding: "11px 36px 11px 36px",
+          border: `1px solid ${C.cardBorder}`, borderRadius: 10,
+          background: C.cardBg, fontSize: 13, color: C.textPrimary,
+          outline: "none", fontFamily: "inherit", transition: "border-color 0.2s",
+        }}
+        onFocus={e => (e.target.style.borderColor = C.labelB)}
+        onBlur={e => (e.target.style.borderColor = C.cardBorder)}
+      />
+      {value && (
+        <button onClick={() => onChange("")}
+          style={{
+            position: "absolute", right: 11, top: "50%",
+            transform: "translateY(-50%)", background: "none", border: "none",
+            cursor: "pointer", color: C.textMuted, fontSize: 17, padding: 0,
+          }}>×</button>
+      )}
+    </div>
+  );
+}
+
+// ─── STATS BAR ───────────────────────────────────────────────────
+function StatsBar() {
+  const total = data.sections.reduce((a, s) => a + s.items.length, 0);
+  return (
+    <div style={{
+      display: "flex", gap: 18, padding: "10px 0 18px",
+      borderBottom: `2px dashed ${C.labelD}`, marginBottom: 22,
+    }}>
+      {[
+        ["◎", `${data.sections.length} sections`],
+        ["◈", `${total} entries`],
+        ["⌘", "Mac shortcuts"],
+        ["⊞", "Win / Linux"],
+      ].map(([icon, label]) => (
+        <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <span style={{ color: C.textMuted, fontSize: 12 }}>{icon}</span>
+          <span style={{ fontSize: 11.5, color: C.textSecondary, letterSpacing: "0.02em" }}>{label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── APP ─────────────────────────────────────────────────────────
+export default function App() {
+  const [active, setActive] = useState("getting-started");
+  const [search, setSearch] = useState("");
+
+  const displayed = search.trim()
+    ? data.sections.map(s => ({
+        ...s,
+        items: s.items.filter(item =>
+          [item.title, item.mac, item.win, item.note || ""]
+            .some(t => t.toLowerCase().includes(search.toLowerCase()))
+        ),
+      })).filter(s => s.items.length > 0)
+    : data.sections.filter(s => s.id === active);
+
+  return (
+    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Palatino Linotype','Book Antiqua',Georgia,serif", color: C.textPrimary }}>
+
+      {/* HEADER */}
+      <div style={{
+        background: C.headerBg, borderBottom: `2px solid ${C.labelB}`, boxShadow: "0 1px 12px rgba(64,145,108,0.08)",
+        padding: "0 24px", display: "flex", alignItems: "center",
+        justifyContent: "space-between", height: 56,
+        position: "sticky", top: 0, zIndex: 100,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
+          <div style={{
+            width: 30, height: 30, background: C.labelE, borderRadius: 7,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#fff", fontSize: 15,
+          }}>◈</div>
+          <div>
+            <div style={{ fontSize: 14.5, fontWeight: 600, letterSpacing: "-0.02em", color: C.textPrimary, lineHeight: 1.2 }}>Claude Code</div>
+            <div style={{ fontSize: 9.5, color: C.textMuted, letterSpacing: "0.09em", textTransform: "uppercase" }}>Reference Guide</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <span style={{
+            background: C.accentLight, color: C.textSecondary,
+            fontSize: 10.5, padding: "3px 10px", borderRadius: 20,
+            letterSpacing: "0.03em", border: `1px solid ${C.cardBorder}`,
+          }}>⌘ mac  ·  ⊞ win</span>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", maxWidth: 1060, margin: "0 auto" }}>
+
+        {/* SIDEBAR */}
+        <div style={{
+          width: 206, flexShrink: 0, padding: "22px 0 32px 14px",
+          position: "sticky", top: 56, height: "calc(100vh - 56px)",
+          overflowY: "auto",
+        }}>
+          <div style={{
+            fontSize: 9, letterSpacing: "0.13em", textTransform: "uppercase",
+            color: C.textMuted, marginBottom: 10, paddingLeft: 12,
+          }}>Sections</div>
+          {data.sections.map(s => {
+            const on = s.id === active && !search;
+            return (
+              <button key={s.id}
+                onClick={() => { setActive(s.id); setSearch(""); }}
+                style={{
+                  width: "100%", textAlign: "left",
+                  background: on ? C.sidebarActive : "transparent",
+                  border: "none",
+                  borderLeft: on ? `3px solid ${C.labelB}` : "3px solid transparent",
+                  borderRadius: on ? "0 8px 8px 0" : 8,
+                  padding: "7px 12px 7px 10px",
+                  cursor: "pointer", fontSize: 12.5,
+                  color: on ? C.labelA : C.textSecondary,
+                  fontWeight: on ? 700 : 400,
+                  display: "flex", alignItems: "center", gap: 8,
+                  transition: "all 0.14s", fontFamily: "inherit",
+                  marginBottom: 1,
+                }}
+              >
+                <span style={{ color: s.color, fontSize: 13, flexShrink: 0 }}>{s.icon}</span>
+                <span>{s.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* MAIN CONTENT */}
+        <div style={{ flex: 1, padding: "22px 24px 64px 18px" }}>
+          <SearchBar value={search} onChange={setSearch} />
+
+          {!search && <StatsBar />}
+
+          {search && displayed.length === 0 && (
+            <div style={{ textAlign: "center", color: C.textMuted, padding: "56px 0", fontSize: 14 }}>
+              No results for "{search}"
+            </div>
+          )}
+
+          {displayed.map(section => (
+            <div key={section.id} style={{ marginBottom: 36 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 13 }}>
+                <span style={{ color: section.color, fontSize: 19 }}>{section.icon}</span>
+                <h2 style={{
+                  margin: 0, fontSize: 17, fontWeight: 700,
+                  color: C.textPrimary, letterSpacing: "-0.02em",
+                }}>{section.label}</h2>
+                <span style={{
+                  fontSize: 10, color: C.textMuted, letterSpacing: "0.05em",
+                  background: "#e6f4ec", color: C.labelA, padding: "2px 9px", borderRadius: 20, fontWeight: 600,
+                }}>{section.items.length}</span>
+              </div>
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(295px, 1fr))",
+                gap: 8,
+              }}>
+                {section.items.map((item, i) => <Card key={i} item={item} />)}
+              </div>
+            </div>
+          ))}
+
+          {!search && (
+            <div style={{
+              marginTop: 40, padding: "18px 22px",
+              background: C.accentLight, borderRadius: 12,
+              fontSize: 12.5, color: C.noteText, lineHeight: 1.8,
+              borderLeft: `4px solid ${C.labelB}`,
+            }}>
+              <div style={{ fontWeight: 700, color: C.textPrimary, marginBottom: 6, fontSize: 13 }}>
+                ✦ Quick Start
+              </div>
+              Install:{" "}
+              <code style={{ background: C.inlineCode, padding: "1px 6px", borderRadius: 3, color: C.codeText, fontFamily: "monospace" }}>
+                npm install -g @anthropic-ai/claude-code
+              </code>
+              {" "}→ run{" "}
+              <code style={{ background: C.inlineCode, padding: "1px 6px", borderRadius: 3, color: C.codeText, fontFamily: "monospace" }}>claude</code>
+              {" "}→ run{" "}
+              <code style={{ background: C.inlineCode, padding: "1px 6px", borderRadius: 3, color: C.codeText, fontFamily: "monospace" }}>/init</code>
+              {" "}to generate your CLAUDE.md. Core habits: use{" "}
+              <strong>Escape</strong> to stop (not Ctrl+C), <strong>/clear</strong> between tasks, <strong>Shift+Tab</strong> for Plan Mode.
+              Click any card to expand it. Toggle <strong>⌘ macOS / ⊞ Win</strong> tabs for platform-specific commands.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

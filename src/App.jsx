@@ -1,17 +1,9 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Link, useNavigate } from "react-router-dom";
+import { Routes, Route, Link } from "react-router-dom";
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, increment } from "firebase/firestore";
+import { firebaseConfig } from "./firebase.config.js";
 import data from "./data.json";
-
-// Try to import Firebase config, fall back to null if not configured yet
-let firebaseConfig = null;
-try {
-  const config = await import("./firebase.config.js");
-  firebaseConfig = config.firebaseConfig;
-} catch (e) {
-  console.warn("Firebase not configured yet. Comments disabled.");
-}
 
 // Initialize Firebase if configured
 let db = null;
@@ -67,8 +59,7 @@ const DARK = {
   inlineCode: "#161b22",
 };
 
-// Type config generator
-const getTypeConfig = (isDark) => ({
+const getTypeConfig = () => ({
   code: { label: "CMD", bg: "#c45f33" },
   shortcut: { label: "KEY", bg: "#d97548" },
   command: { label: "/", bg: "#e87c4e" },
@@ -241,7 +232,10 @@ function Comments({ sectionId, C }) {
         border: `1px solid ${C.cardBorder}`, borderRadius: 8,
         fontSize: 12, color: C.textMuted,
       }}>
-        💬 Comments disabled. Configure Firebase to enable. See SETUP.md
+        💬 Comments disabled. Add your Firebase config to <code style={{
+          background: C.codeBg, padding: "2px 6px", borderRadius: 3,
+          fontFamily: "monospace", fontSize: 11,
+        }}>src/firebase.config.js</code> to enable. See SETUP.md
       </div>
     );
   }
@@ -363,7 +357,7 @@ function MainGuide({ darkMode, setDarkMode }) {
   const [showComments, setShowComments] = useState({});
   
   const C = darkMode ? DARK : LIGHT;
-  const typeConfig = getTypeConfig(darkMode);
+  const typeConfig = getTypeConfig();
   
   const displayed = search.trim()
     ? data.sections.map(s => ({
@@ -383,7 +377,6 @@ function MainGuide({ darkMode, setDarkMode }) {
       fontFamily: "'Palatino Linotype','Book Antiqua',Georgia,serif",
       color: C.textPrimary, transition: "background 0.3s, color 0.3s",
     }}>
-      {/* Header */}
       <div style={{
         background: C.headerBg, borderBottom: `1px solid ${C.headerBorder}`,
         padding: "0 24px", display: "flex", alignItems: "center",
@@ -443,7 +436,6 @@ function MainGuide({ darkMode, setDarkMode }) {
       </div>
       
       <div style={{ display: "flex", maxWidth: 1060, margin: "0 auto" }}>
-        {/* Sidebar */}
         <div style={{
           width: 206, flexShrink: 0, padding: "22px 0 32px 14px",
           position: "sticky", top: 56, height: "calc(100vh - 56px)",
@@ -477,7 +469,6 @@ function MainGuide({ darkMode, setDarkMode }) {
           })}
         </div>
         
-        {/* Main Content */}
         <div style={{ flex: 1, padding: "22px 24px 64px 18px" }}>
           <SearchBar value={search} onChange={setSearch} C={C} />
           
@@ -565,13 +556,12 @@ function AdminPanel({ darkMode }) {
   
   const fetchContributions = async () => {
     try {
-      // Try to import admin config
       let adminConfig = null;
       try {
         const config = await import("./admin.config.js");
         adminConfig = config.adminConfig;
       } catch (e) {
-        setError("Admin config not found. See SETUP.md");
+        setError("Admin config not found. Create src/admin.config.js - see SETUP.md");
         setLoading(false);
         return;
       }
@@ -624,12 +614,6 @@ function AdminPanel({ darkMode }) {
             color: "#e74c3c", marginBottom: 16,
           }}>
             <strong>Error:</strong> {error}
-            <p style={{ margin: "8px 0 0", fontSize: 13 }}>
-              Make sure you've created <code style={{
-                background: C.codeBg, padding: "2px 6px",
-                borderRadius: 3, fontFamily: "monospace",
-              }}>src/admin.config.js</code> with your GitHub token. See SETUP.md
-            </p>
           </div>
         )}
         
