@@ -23,5 +23,6 @@ dist-ssr
 *.sw?
 
 # Firebase config with secrets
-src/firebase.config.js
 src/admin.config.js
+.env
+.env
