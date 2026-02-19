@@ -10,13 +10,12 @@
 // ═══════════════════════════════════════════════════════════════
 
 export const firebaseConfig = {
-   apiKey: "AIzaSyC21gHnFadm0x8jEjuO68muLD8I8VSJMNc",
-   authDomain: "claude-code-guide.firebaseapp.com",
-   projectId: "claude-code-guide",
-   storageBucket: "claude-code-guide.firebasestorage.app",
-   messagingSenderId: "1063709329182",
-   appId: "1:1063709329182:web:e9623f7cc425c790436b0f",
-   measurementId: "G-5Q50RQRG6V"
+  apiKey: "AIza...",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef"
 };
 
 // After creating firebase.config.js, add it to .gitignore!
