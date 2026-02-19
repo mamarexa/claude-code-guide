@@ -8,8 +8,14 @@ A comprehensive, community-driven reference guide for Claude Code featuring:
 - 📝 GitHub Issues integration for feedback
 - 🎨 Modern, accessible UI
 
-## Quick Start
+Here is the app, enjoy it:
+[Claude Code Community Guid](https://mamarexa.github.io/claude-code-guide/)
 
+You can give me feedback to improve the app, or add more content, and even put your comment directly on the app.
+
+But, if you want to deploy it for yourself, here is the code:
+
+## Quick Start
 ### 1. Deploy to GitHub Pages
 
 ```bash
@@ -76,5 +82,3 @@ Commit and push - GitHub Actions will auto-deploy.
 - GitHub Pages
 
 ---
-
-Built with ❤️ by the Claude Code community
