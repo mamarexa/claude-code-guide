@@ -26,3 +26,4 @@ dist-ssr
 src/firebase.config.js
 src/admin.config.js
 .env
+.env
