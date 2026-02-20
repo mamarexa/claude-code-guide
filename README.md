@@ -9,7 +9,7 @@ A comprehensive, community-driven reference guide for Claude Code featuring:
 - 🎨 Modern, accessible UI
 
 Here is the app, enjoy it:
-[Claude Code Community Guid](https://mamarexa.github.io/claude-code-guide/)
+[Claude Code Community Guide](https://mamarexa.github.io/claude-code-guide/)
 
 You can give me feedback to improve the app, or add more content, and even put your comment directly on the app.
 
